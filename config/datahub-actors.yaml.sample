@@ -1,0 +1,22 @@
+parameters:
+  oai_pmh_api:
+    url: 'http://datahub.example.com/oai'
+    metadata_prefix: 'oai_lido'
+    namespace: 'lido'
+#    set: ''
+#    username: ''
+#    password: ''
+
+  override_ca_cert: false
+  ca_cert: 'cacert.pem'
+
+  filename: public/actors.json
+
+  xpaths:
+    object_id: 'lidoRecID[@type="purl" and @label="dataPID"]'
+    actor: 'descriptiveMetadata/eventWrap/eventSet/event[eventType/term="production"]/eventActor/actorInRole'
+    name: '(actor/nameActorSet/appellationValue)[1]'
+    alternative_names: 'actor/nameActorSet/appellationValue'
+    external_authorities: 'actor/actorID[not(@type="local")]'
+    role_nl: 'roleActor/term[@xml:lang="nl"]'
+    role_en: 'roleActor/term[@xml:lang="en"]'
