@@ -15,7 +15,7 @@ parameters:
   xpaths:
     object_id: 'lidoRecID[@type="purl" and @label="dataPID"]'
     actor: 'descriptiveMetadata/eventWrap/eventSet/event[eventType/term="production"]/eventActor/actorInRole'
-    name: '(actor/nameActorSet/appellationValue)[1]'
+    name: 'actor/nameActorSet/appellationValue[@xml:lang="nl"][last()]'
     alternative_names: 'actor/nameActorSet/appellationValue'
     external_authorities: 'actor/actorID[not(@type="local")]'
     role_nl: 'roleActor/term[@xml:lang="nl"]'
