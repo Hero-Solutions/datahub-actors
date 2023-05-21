@@ -56,7 +56,6 @@ class FetchActorsCommand extends Command
             $nameXpath = $this->buildXPath($xpaths['name'], $this->namespace);
             $alternativeNamesXpath = $this->buildXPath($xpaths['alternative_names'], $this->namespace);
             $externalAuthoritiesXpath = $this->buildXPath($xpaths['external_authorities'], $this->namespace);
-            $externalAuthoritySourceXpath = $this->buildXPath($xpaths['external_authority_source'], $this->namespace);
             $roleNlXpath = $this->buildXPath($xpaths['role_nl'], $this->namespace);
             $roleEnXpath = $this->buildXPath($xpaths['role_en'], $this->namespace);
             $birthDateXpath = $this->buildXPath($xpaths['birth_date'], $this->namespace);
@@ -131,7 +130,7 @@ class FetchActorsCommand extends Command
                                     $actorAuthorityIds = $actor->xpath($externalAuthoritiesXpath);
                                     if ($actorAuthorityIds) {
                                         foreach ($actorAuthorityIds as $id_) {
-                                            $externalAuthoritySources = $id_->xpath($externalAuthoritySourceXpath);
+                                            $externalAuthoritySources = $id_->xpath('@' . $this->namespace . ':source');
                                             $externalAuthoritySource = null;
                                             if($externalAuthoritySources) {
                                                 foreach($externalAuthoritySources as $source) {
