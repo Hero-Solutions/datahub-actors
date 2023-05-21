@@ -131,7 +131,7 @@ class FetchActorsCommand extends Command
                                     $actorAuthorityIds = $actor->xpath($externalAuthoritiesXpath);
                                     if ($actorAuthorityIds) {
                                         foreach ($actorAuthorityIds as $id_) {
-                                            $externalAuthoritySources = $id->xpath($externalAuthoritySourceXpath);
+                                            $externalAuthoritySources = $id_->xpath($externalAuthoritySourceXpath);
                                             $externalAuthoritySource = null;
                                             if($externalAuthoritySources) {
                                                 foreach($externalAuthoritySources as $source) {
