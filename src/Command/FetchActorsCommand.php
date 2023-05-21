@@ -99,10 +99,6 @@ class FetchActorsCommand extends Command
                                         $actors[$name] = [];
                                     }
 
-                                    if($image !== null) {
-                                        $actors[$name]['image'] = $image;
-                                    }
-
                                     $actorAltNames = $actor->xpath($alternativeNamesXpath);
                                     if ($actorAltNames) {
                                         foreach ($actorAltNames as $altName_) {
@@ -134,10 +130,10 @@ class FetchActorsCommand extends Command
                                         }
                                     }
 
-                                    if($birthDate !== null && !array_key_exists('birth_date', $actors[$name])) {
+                                    if($birthDate !== null && !empty($birthDate) && !array_key_exists('birth_date', $actors[$name])) {
                                         $actors[$name]['birth_date'] = $birthDate;
                                     }
-                                    if($deathDate !== null && !array_key_exists('death_date', $actors[$name])) {
+                                    if($deathDate !== null && !empty($deathDate) && !array_key_exists('death_date', $actors[$name])) {
                                         $actors[$name]['death_date'] = $deathDate;
                                     }
 
@@ -172,6 +168,10 @@ class FetchActorsCommand extends Command
                                     $work = [
                                         'id' => $objectId
                                     ];
+
+                                    if($image !== null) {
+                                        $work['image'] = $image;
+                                    }
 
                                     //Get the role of the actor related to this work
                                     $roleNl = null;
