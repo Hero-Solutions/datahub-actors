@@ -56,8 +56,11 @@ class FetchActorsCommand extends Command
             $nameXpath = $this->buildXPath($xpaths['name'], $this->namespace);
             $alternativeNamesXpath = $this->buildXPath($xpaths['alternative_names'], $this->namespace);
             $externalAuthoritiesXpath = $this->buildXPath($xpaths['external_authorities'], $this->namespace);
+            $externalAuthoritySourceXpath = $this->buildXPath($xpaths['external_authority_source'], $this->namespace);
             $roleNlXpath = $this->buildXPath($xpaths['role_nl'], $this->namespace);
             $roleEnXpath = $this->buildXPath($xpaths['role_en'], $this->namespace);
+            $birthDateXpath = $this->buildXPath($xpaths['birth_date'], $this->namespace);
+            $deathDateXpath = $this->buildXPath($xpaths['death_date'], $this->namespace);
 
             foreach($records as $record) {
                 $data = $record->metadata->children($this->namespace, true);
@@ -102,15 +105,49 @@ class FetchActorsCommand extends Command
                                         }
                                     }
 
+                                    $birthDate = null;
+                                    $birthDates = $actor->xpath($birthDateXpath);
+                                    if ($birthDates) {
+                                        foreach ($birthDates as $date) {
+                                            $birthDate = (string)$date;
+                                        }
+                                    }
+
+                                    $deathDate = null;
+                                    $deathDates = $actor->xpath($deathDateXpath);
+                                    if ($deathDates) {
+                                        foreach ($deathDates as $date) {
+                                            $deathDate = (string)$date;
+                                        }
+                                    }
+
+                                    if($birthDate !== null && !array_key_exists('birth_date', $actors[$name])) {
+                                        $actors[$name]['birth_date'] = $birthDate;
+                                    }
+                                    if($deathDate !== null && !array_key_exists('death_date', $actors[$name])) {
+                                        $actors[$name]['death_date'] = $deathDate;
+                                    }
+
                                     $actorAuthorityIds = $actor->xpath($externalAuthoritiesXpath);
                                     if ($actorAuthorityIds) {
                                         foreach ($actorAuthorityIds as $id_) {
+                                            $externalAuthoritySources = $id->xpath($externalAuthoritySourceXpath);
+                                            $externalAuthoritySource = null;
+                                            if($externalAuthoritySources) {
+                                                foreach($externalAuthoritySources as $source) {
+                                                    $externalAuthoritySource = (string)$source;
+                                                }
+                                            }
                                             $id = (string)$id_;
                                             if(!array_key_exists('external_authorities', $actors[$name])) {
                                                 $actors[$name]['external_authorities'] = [];
                                             }
                                             if(!in_array($id, $actors[$name]['external_authorities'])) {
-                                                $actors[$name]['external_authorities'][] = $id;
+                                                if($externalAuthoritySource !== null) {
+                                                    $actors[$name]['external_authorities'][$externalAuthoritySource] = $id;
+                                                } else {
+                                                    $actors[$name]['external_authorities'][] = $id;
+                                                }
                                             }
                                         }
                                     }
@@ -133,29 +170,16 @@ class FetchActorsCommand extends Command
                                     if(!array_key_exists('works', $actors[$name])) {
                                         $actors[$name]['works'] = [];
                                     }
+                                    $work = [
+                                        'id' => $objectId
+                                    ];
                                     if($roleNl !== null) {
-                                        if($roleEn !== null) {
-                                            $actors[$name]['works'][] = [
-                                                'id' => $objectId,
-                                                'role_nl' => $roleNl,
-                                                'role_en' => $roleEn
-                                            ];
-                                        } else {
-                                            $actors[$name]['works'][] = [
-                                                'id' => $objectId,
-                                                'role_nl' => $roleNl
-                                            ];
-                                        }
-                                    } else if($roleEn !== null) {
-                                        $actors[$name]['works'][] = [
-                                            'id' => $objectId,
-                                            'role_en' => $roleEn
-                                        ];
-                                    } else {
-                                        $actors[$name]['works'][] = [
-                                            'id' => $objectId
-                                        ];
+                                        $work['role_nl'] = $roleNl;
                                     }
+                                    if($roleEn !== null) {
+                                        $work['role_en'] = $roleEn;
+                                    }
+                                    $actors[$name]['works'][] = $work;
                                 }
                             }
                         }
@@ -184,11 +208,10 @@ class FetchActorsCommand extends Command
             $prepend = '(';
             $xpath = substr($xpath, 1);
         }
-        $xpath = preg_replace('/\[@(?!xml|text|contains|last)/', '[@' . $namespace . ':${1}', $xpath);
-        $xpath = preg_replace('/\(@(?!xml|text|contains|last)/', '(@' . $namespace . ':${1}', $xpath);
-        $xpath = preg_replace('/\[(?![@0-9]|not\(|text|contains|last)/', '[' . $namespace . ':${1}', $xpath);
-        $xpath = preg_replace('/\/@/', '/@' . $namespace . ':', $xpath);
-        $xpath = preg_replace('/\/([^@\/])/', '/' . $namespace . ':${1}', $xpath);
+        $xpath = preg_replace('/\[@(?!xml|text)/', '[@' . $namespace . ':${1}', $xpath);
+        $xpath = preg_replace('/\(@(?!xml|text)/', '(@' . $namespace . ':${1}', $xpath);
+        $xpath = preg_replace('/\[(?![@0-9]|not\(|text|position\()/', '[' . $namespace . ':${1}', $xpath);
+        $xpath = preg_replace('/\/([^\/])/', '/' . $namespace . ':${1}', $xpath);
         $xpath = preg_replace('/ and @(?!xml)/', ' and @' . $namespace . ':${1}', $xpath);
         $xpath = preg_replace('/ and not\(([^@])/', ' and not(' . $namespace . ':${1}', $xpath);
         if(strpos($xpath, '/') !== 0) {
