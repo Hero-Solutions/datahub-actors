@@ -60,6 +60,7 @@ class FetchActorsCommand extends Command
             $roleEnXpath = $this->buildXPath($xpaths['role_en'], $this->namespace);
             $birthDateXpath = $this->buildXPath($xpaths['birth_date'], $this->namespace);
             $deathDateXpath = $this->buildXPath($xpaths['death_date'], $this->namespace);
+            $imageXpath = $this->buildXPath($xpaths['image'], $this->namespace);
 
             foreach($records as $record) {
                 $data = $record->metadata->children($this->namespace, true);
@@ -74,6 +75,13 @@ class FetchActorsCommand extends Command
                             }
                         }
                         if ($objectId !== null) {
+                            $image = null;
+                            $images = $data->xpath($imageXpath);
+                            if($images) {
+                                foreach($images as $img) {
+                                    $image = (string) $img;
+                                }
+                            }
                             foreach ($actorsRes as $actor) {
                                 //Get the name of the actor
                                 $name = null;
@@ -87,6 +95,10 @@ class FetchActorsCommand extends Command
                                 if ($name !== null) {
                                     if (!array_key_exists($name, $actors)) {
                                         $actors[$name] = [];
+                                    }
+
+                                    if($image !== null) {
+                                        $actors[$name]['image'] = $image;
                                     }
 
                                     $actorAltNames = $actor->xpath($alternativeNamesXpath);
