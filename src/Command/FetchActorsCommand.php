@@ -150,6 +150,7 @@ class FetchActorsCommand extends Command
                                                 }
                                             }
                                             $id = (string)$id_;
+                                            str_replace('http://', 'https://', $id);
                                             if(!array_key_exists('external_authorities', $actors[$name])) {
                                                 $actors[$name]['external_authorities'] = [];
                                             }
