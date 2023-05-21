@@ -58,6 +58,8 @@ class FetchActorsCommand extends Command
             $externalAuthoritiesXpath = $this->buildXPath($xpaths['external_authorities'], $this->namespace);
             $roleNlXpath = $this->buildXPath($xpaths['role_nl'], $this->namespace);
             $roleEnXpath = $this->buildXPath($xpaths['role_en'], $this->namespace);
+            $attributionNlXpath = $this->buildXPath($xpaths['attribution_nl'], $this->namespace);
+            $attributionEnXpath = $this->buildXPath($xpaths['attribution_en'], $this->namespace);
             $birthDateXpath = $this->buildXPath($xpaths['birth_date'], $this->namespace);
             $deathDateXpath = $this->buildXPath($xpaths['death_date'], $this->namespace);
             $imageXpath = $this->buildXPath($xpaths['image'], $this->namespace);
@@ -164,33 +166,59 @@ class FetchActorsCommand extends Command
                                         }
                                     }
 
-                                    //Get the role of the actor related to this work
-                                    $roleNl = null;
-                                    $roleEn = null;
-                                    $rolesNl = $actor->xpath($roleNlXpath);
-                                    $rolesEn = $actor->xpath($roleEnXpath);
-                                    if ($rolesNl) {
-                                        foreach ($rolesNl as $role) {
-                                            $roleNl = (string)$role;
-                                        }
-                                    }
-                                    if ($rolesEn) {
-                                        foreach ($rolesEn as $role) {
-                                            $roleEn = (string)$role;
-                                        }
-                                    }
                                     if(!array_key_exists('works', $actors[$name])) {
                                         $actors[$name]['works'] = [];
                                     }
                                     $work = [
                                         'id' => $objectId
                                     ];
+
+                                    //Get the role of the actor related to this work
+                                    $roleNl = null;
+                                    $rolesNl = $actor->xpath($roleNlXpath);
+                                    if ($rolesNl) {
+                                        foreach ($rolesNl as $role) {
+                                            $roleNl = (string)$role;
+                                        }
+                                    }
                                     if($roleNl !== null) {
                                         $work['role_nl'] = $roleNl;
+                                    }
+
+                                    $roleEn = null;
+                                    $rolesEn = $actor->xpath($roleEnXpath);
+                                    if ($rolesEn) {
+                                        foreach ($rolesEn as $role) {
+                                            $roleEn = (string)$role;
+                                        }
                                     }
                                     if($roleEn !== null) {
                                         $work['role_en'] = $roleEn;
                                     }
+
+                                    //Get the attribution of the actor related to this work
+                                    $attributionNl = null;
+                                    $attributionsNl = $actor->xpath($attributionNlXpath);
+                                    if ($attributionsNl) {
+                                        foreach ($attributionsNl as $attribution) {
+                                            $attributionNl = (string)$attribution;
+                                        }
+                                    }
+                                    if($attributionNl !== null) {
+                                        $work['attribution_nl'] = $attributionNl;
+                                    }
+
+                                    $attributionEn = null;
+                                    $attributionsEn = $actor->xpath($attributionEnXpath);
+                                    if ($attributionsEn) {
+                                        foreach ($attributionsEn as $attribution) {
+                                            $attributionEn = (string)$attribution;
+                                        }
+                                    }
+                                    if($attributionEn !== null) {
+                                        $work['attribution_en'] = $attributionEn;
+                                    }
+
                                     $actors[$name]['works'][] = $work;
                                 }
                             }
@@ -203,6 +231,8 @@ class FetchActorsCommand extends Command
         }
 
         if(!empty($actors)) {
+            //TODO merge actors with the same RKD ID
+
             ksort($actors);
             $fp = fopen($filename, 'w');
             fwrite($fp, json_encode($actors, JSON_PRETTY_PRINT));
