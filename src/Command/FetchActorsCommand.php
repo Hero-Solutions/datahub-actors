@@ -130,11 +130,23 @@ class FetchActorsCommand extends Command
                                         }
                                     }
 
-                                    if($birthDate !== null && !empty($birthDate) && !array_key_exists('birth_date', $actors[$name])) {
-                                        $actors[$name]['birth_date'] = $birthDate;
+                                    if($birthDate !== null && !empty($birthDate)) {
+                                        if(!array_key_exists('birth_date', $actors[$name])) {
+                                            $actors[$name]['birth_date'] = $birthDate;
+                                        } else {
+                                            if(strlen($birthDate) > strlen($actors[$name]['birth_date'])) {
+                                                $actors[$name]['birth_date'] = $birthDate;
+                                            }
+                                        }
                                     }
-                                    if($deathDate !== null && !empty($deathDate) && !array_key_exists('death_date', $actors[$name])) {
-                                        $actors[$name]['death_date'] = $deathDate;
+                                    if($deathDate !== null && !empty($deathDate)) {
+                                        if(!array_key_exists('death_date', $actors[$name])) {
+                                            $actors[$name]['death_date'] = $deathDate;
+                                        } else {
+                                            if(strlen($deathDate) > strlen($actors[$name]['death_date'])) {
+                                                $actors[$name]['death_date'] = $deathDate;
+                                            }
+                                        }
                                     }
 
                                     $actorAuthorityIds = $actor->xpath($externalAuthoritiesXpath);
