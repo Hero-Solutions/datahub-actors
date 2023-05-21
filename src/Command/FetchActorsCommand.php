@@ -221,7 +221,7 @@ class FetchActorsCommand extends Command
         }
         $xpath = preg_replace('/\[@(?!xml|text|contains|last)/', '[@' . $namespace . ':${1}', $xpath);
         $xpath = preg_replace('/\(@(?!xml|text|contains|last)/', '(@' . $namespace . ':${1}', $xpath);
-        $xpath = preg_replace('/\[(?![@0-9]|not\(|text|last|position\()/', '[' . $namespace . ':${1}', $xpath);
+        $xpath = preg_replace('/\[(?![@0-9]|not\(|text|contains|last|position\()/', '[' . $namespace . ':${1}', $xpath);
         $xpath = preg_replace('/\/([^\/])/', '/' . $namespace . ':${1}', $xpath);
         $xpath = preg_replace('/ and @(?!xml)/', ' and @' . $namespace . ':${1}', $xpath);
         $xpath = preg_replace('/ and not\(([^@])/', ' and not(' . $namespace . ':${1}', $xpath);
