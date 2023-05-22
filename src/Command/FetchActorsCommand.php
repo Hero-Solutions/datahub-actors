@@ -239,6 +239,7 @@ class FetchActorsCommand extends Command
         }
 
         if(!empty($actors)) {
+            //Merge actors with the same RKD ID but with a different name
             $mergedActors = [];
             foreach($actors as $name => $actor) {
                 if(array_key_exists($name, $mergedActors)) {
@@ -288,9 +289,37 @@ class FetchActorsCommand extends Command
                 $mergedActors[$nameKey] = $actorValue;
             }
 
-            ksort($mergedActors);
+            //Merge actors with the same name but with '(' or ')' in one name and not in the other
+            $mergedActors2 = [];
+            foreach($mergedActors as $name => $actor) {
+                if(array_key_exists($name, $mergedActors2)) {
+                    continue;
+                }
+
+                $nameKey = $name;
+                $actorValue = $actor;
+                //Check if this name already exists but with '(' or ')' in the name
+                if(strpos($name, '(') !== false || strpos($name, ')') !== false) {
+                    $nameStripped = str_replace('(', '', $name);
+                    $nameStripped = str_replace(')', '', $nameStripped);
+                    if(array_key_exists($nameStripped, $actors)) {
+                        $actorValue = array_merge($actor, $actors[$nameStripped]);
+                        if(!array_key_exists('alternative_names', $actorValue)) {
+                            $actorValue['alternative_names'] = [];
+                        }
+                        if(!in_array($name, $actorValue['alternative_names'])) {
+                            $actors[$nameStripped]['alternative_names'][] = $name;
+                        }
+                        $nameKey = $nameStripped;
+                        $actorValue['alternative_names'] = array_unique($actorValue['alternative_names']);
+                    }
+                }
+                $mergedActors2[$nameKey] = $actorValue;
+            }
+
+            ksort($mergedActors2);
             $fp = fopen($filename, 'w');
-            fwrite($fp, json_encode($mergedActors, JSON_PRETTY_PRINT));
+            fwrite($fp, json_encode($mergedActors2, JSON_PRETTY_PRINT));
             fclose($fp);
         }
 
