@@ -175,9 +175,7 @@ class FetchActorsCommand extends Command
                                     if(!array_key_exists('works', $actors[$name])) {
                                         $actors[$name]['works'] = [];
                                     }
-                                    $work = [
-                                        'id' => $objectId
-                                    ];
+                                    $work = [];
 
                                     if($image !== null) {
                                         $work['image'] = $image;
@@ -229,7 +227,7 @@ class FetchActorsCommand extends Command
                                         $work['attribution_en'] = $attributionEn;
                                     }
 
-                                    $actors[$name]['works'][] = $work;
+                                    $actors[$name]['works'][$objectId] = $work;
                                 }
                             }
                         }
@@ -283,10 +281,6 @@ class FetchActorsCommand extends Command
                                     }
                                 }
                                 $actorValue['alternative_names'] = array_unique($actorValue['alternative_names']);
-                                if(array_key_exists('works', $actorValue)) {
-                                    //Not entirely sure if this will work correctly, needs to be properly tested yet
-                                    $actorValue['works'] = array_unique($actorValue['works']);
-                                }
                             }
                         }
                     }
