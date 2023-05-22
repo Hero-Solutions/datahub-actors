@@ -159,16 +159,14 @@ class FetchActorsCommand extends Command
                                                     $externalAuthoritySource = (string)$source;
                                                 }
                                             }
-                                            $id = (string)$id_;
-                                            str_replace('http://', 'https://', $id);
-                                            if(!array_key_exists('external_authorities', $actors[$name])) {
-                                                $actors[$name]['external_authorities'] = [];
-                                            }
-                                            if(!in_array($id, $actors[$name]['external_authorities'])) {
-                                                if($externalAuthoritySource !== null) {
+                                            if($externalAuthoritySource !== null) {
+                                                $id = (string)$id_;
+                                                str_replace('http://', 'https://', $id);
+                                                if (!array_key_exists('external_authorities', $actors[$name])) {
+                                                    $actors[$name]['external_authorities'] = [];
+                                                }
+                                                if (!in_array($id, $actors[$name]['external_authorities'])) {
                                                     $actors[$name]['external_authorities'][$externalAuthoritySource] = $id;
-                                                } else {
-                                                    $actors[$name]['external_authorities'][] = $id;
                                                 }
                                             }
                                         }
@@ -243,11 +241,62 @@ class FetchActorsCommand extends Command
         }
 
         if(!empty($actors)) {
-            //TODO merge actors with the same RKD ID
+            $mergedActors = [];
+            foreach($actors as $name => $actor) {
+                if(array_key_exists($name, $mergedActors)) {
+                    continue;
+                }
 
-            ksort($actors);
+                $nameKey = $name;
+                $actorValue = $actor;
+                $rkdId = null;
+                if(array_key_exists('external_authorities', $actor)) {
+                    if(array_key_exists('RKD', $actor['external_authorities'])) {
+                        $rkdId = $actor['external_authorities']['RKD'];
+                    }
+                }
+                if($rkdId !== null) {
+                    foreach($actors as $name1 => $actor1) {
+                        if($name1 !== $name) {
+                            $rkdId1 = null;
+                            if (array_key_exists('external_authorities', $actor1)) {
+                                if (array_key_exists('RKD', $actor1['external_authorities'])) {
+                                    $rkdId1 = $actor1['external_authorities']['RKD'];
+                                }
+                            }
+                            //Merge actors with the same RKD ID but different name
+                            if ($rkdId1 !== null && $rkdId1 === $rkdId) {
+                                $actorValue = array_merge($actor1, $actor);
+                                if(!array_key_exists('alternative_names', $actorValue)) {
+                                    $actorValue['alternative_names'] = [];
+                                }
+                                //Add the name of one entry as alternative name to the other entry
+                                //Give preference to name1 if name contains ',', '(' or ')'
+                                if(strpos($name, ',') !== false || strpos($name, '(') !== false || strpos($name, ')') !== false) {
+                                    if(!in_array($name, $actorValue['alternative_names'])) {
+                                        $actorValue['alternative_names'][] = $name;
+                                    }
+                                    $nameKey = $name1;
+                                } else {
+                                    if(!in_array($name1, $actorValue['alternative_names'])) {
+                                        $actorValue['alternative_names'][] = $name1;
+                                    }
+                                }
+                                $actorValue['alternative_names'] = array_unique($actorValue['alternative_names']);
+                                if(array_key_exists('works', $actorValue)) {
+                                    //Not entirely sure if this will work correctly, needs to be properly tested yet
+                                    $actorValue['works'] = array_unique($actorValue['works']);
+                                }
+                            }
+                        }
+                    }
+                }
+                $mergedActors[$nameKey] = $actorValue;
+            }
+
+            ksort($mergedActors);
             $fp = fopen($filename, 'w');
-            fwrite($fp, json_encode($actors, JSON_PRETTY_PRINT));
+            fwrite($fp, json_encode($mergedActors, JSON_PRETTY_PRINT));
             fclose($fp);
         }
 
