@@ -325,18 +325,18 @@ class FetchActorsCommand extends Command
                 $mergedActors3[$name] = $actor;
             }
 
-            $mergedActors4 = [];
+/*            $mergedActors4 = [];
             foreach($mergedActors3 as $name => $actor) {
                 $actor['alternative_names'] = array_unique($actor['alternative_names']);
                 if(in_array($name, $actor['alternative_names'])) {
                     $actor['alternative_names'] = array_values(array_diff($actor['alternative_names'], [$name]));
                 }
                 $mergedActors4[$name] = $actor;
-            }
+            }*/
 
-            ksort($mergedActors4);
+            ksort($mergedActors3);
             $fp = fopen($filename, 'w');
-            fwrite($fp, json_encode($mergedActors4, JSON_PRETTY_PRINT));
+            fwrite($fp, json_encode($mergedActors3, JSON_PRETTY_PRINT));
             fclose($fp);
         }
 
