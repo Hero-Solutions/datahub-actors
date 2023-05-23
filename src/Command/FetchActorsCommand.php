@@ -334,7 +334,7 @@ class FetchActorsCommand extends Command
                 $mergedActors4[$name] = $actor;
             }
 
-            ksort($mergedActors);
+            ksort($mergedActors4);
             $fp = fopen($filename, 'w');
             fwrite($fp, json_encode($mergedActors4, JSON_PRETTY_PRINT));
             fclose($fp);
