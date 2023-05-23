@@ -331,6 +331,9 @@ class FetchActorsCommand extends Command
                 if(in_array($name, $actor['alternative_names'])) {
                     $actor['alternative_names'] = array_values(array_diff($actor['alternative_names'], [$name]));
                 }
+                if(empty($actor['alternative_names'])) {
+                    unset($actor['alternative_names']);
+                }
                 $mergedActors4[$name] = $actor;
             }
 
