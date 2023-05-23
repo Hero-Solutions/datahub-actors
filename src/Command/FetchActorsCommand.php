@@ -269,20 +269,7 @@ class FetchActorsCommand extends Command
                                 }
                             }
                             if ($rkdId1 !== null && $rkdId1 === $rkdId) {
-                                $actor = array_merge($actor1, $actor);
-                                if(strlen($actor1['birth_date']) > strlen($actor['birth_date'])) {
-                                    $actor['birth_date'] = $actor1['birth_date'];
-                                }
-                                if(strlen($actor1['death_date']) > strlen($actor['death_date'])) {
-                                    $actor['death_date'] = $actor1['death_date'];
-                                }
-                                $actor['alternative_names'] = array_merge($actor1['alternative_names'], $actor['alternative_names']);
-                                if(array_key_exists('external_authorities', $actor) && array_key_exists('external_authorities', $actor1)) {
-                                    $actor['external_authorities'] = array_merge($actor1['external_authorities'], $actor['external_authorities']);
-                                }
-                                if(array_key_exists('works', $actor) && array_key_exists('works', $actor1)) {
-                                    $actor['works'] = array_merge($actor1['works'], $actor['works']);
-                                }
+                                $actor = $this->mergeActors($actor, $actor1);
                             }
                         }
                     }
@@ -304,21 +291,7 @@ class FetchActorsCommand extends Command
                     $nameStripped = str_replace('(', '', $name);
                     $nameStripped = str_replace(')', '', $nameStripped);
                     if(array_key_exists($nameStripped, $actors) && !array_key_exists($nameStripped, $alreadyEncountered)) {
-                        $alreadyEncountered[$nameStripped] = $nameStripped;
-                        $actorValue = array_merge($actor, $actors[$nameStripped]);
-                        if(strlen($actor['birth_date']) > strlen($actors[$nameStripped]['birth_date'])) {
-                            $actorValue['birth_date'] = $actor['birth_date'];
-                        }
-                        if(strlen($actor['death_date']) > strlen($actors[$nameStripped]['death_date'])) {
-                            $actorValue['death_date'] = $actor['death_date'];
-                        }
-                        $actorValue['alternative_names'] = array_merge($actor['alternative_names'], $actors[$nameStripped]['alternative_names']);
-                        if(array_key_exists('external_authorities', $actor) && array_key_exists('external_authorities', $actors[$nameStripped])) {
-                            $actorValue['external_authorities'] = array_merge($actor['external_authorities'], $actors[$nameStripped]['external_authorities']);
-                        }
-                        if(array_key_exists('works', $actor) && array_key_exists('works', $actors[$nameStripped])) {
-                            $actorValue['works'] = array_merge($actor['works'], $actors[$nameStripped]['works']);
-                        }
+                        $actorValue = $this->mergeActors($actors[$nameStripped], $actor);
                     }
                 }
                 $mergedActors2[$name] = $actorValue;
@@ -344,20 +317,7 @@ class FetchActorsCommand extends Command
                             }
                             if($altName === $altName1) {
                                 $alreadyEncountered[$altName1] = $altName1;
-                                $actor = array_merge($actor1, $actor);
-                                if(strlen($actor1['birth_date']) > strlen($actor['birth_date'])) {
-                                    $actor['birth_date'] = $actor1['birth_date'];
-                                }
-                                if(strlen($actor1['death_date']) > strlen($actor['death_date'])) {
-                                    $actor['death_date'] = $actor1['death_date'];
-                                }
-                                $actor['alternative_names'] = array_merge($actor1['alternative_names'], $actor['alternative_names']);
-                                if(array_key_exists('external_authorities', $actor) && array_key_exists('external_authorities', $actor1)) {
-                                    $actor['external_authorities'] = array_merge($actor1['external_authorities'], $actor['external_authorities']);
-                                }
-                                if(array_key_exists('works', $actor) && array_key_exists('works', $actor1)) {
-                                    $actor['works'] = array_merge($actor1['works'], $actor['works']);
-                                }
+                                $actor = $this->mergeActors($actor, $actor1);
                             }
                         }
                     }
@@ -404,5 +364,27 @@ class FetchActorsCommand extends Command
         $xpath = $prepend . $xpath;
 //        echo $xpath . PHP_EOL;
         return $xpath;
+    }
+
+    private function mergeActors($actor, $actor1) {
+        $mergedActor = array_merge($actor1, $actor);
+        $mergedActor['alternative_names'] = array_merge($actor['alternative_names'], $actor1['alternative_names']);
+        if(array_key_exists('birth_date', $actor) && array_key_exists('birth_date', $actor1)) {
+            if (strlen($actor1['birth_date']) > strlen($actor['birth_date'])) {
+                $mergedActor['birth_date'] = $actor1['birth_date'];
+            }
+        }
+        if(array_key_exists('death_date', $actor) && array_key_exists('death_date', $actor1)) {
+            if (strlen($actor1['death_date']) > strlen($actor['death_date'])) {
+                $mergedActor['death_date'] = $actor1['death_date'];
+            }
+        }
+        if(array_key_exists('external_authorities', $actor) && array_key_exists('external_authorities', $actor1)) {
+            $mergedActor['external_authorities'] = array_merge($actor1['external_authorities'], $actor['external_authorities']);
+        }
+        if(array_key_exists('works', $actor) && array_key_exists('works', $actor1)) {
+            $mergedActor['works'] = array_merge($actor['works'], $actor1['works']);
+        }
+        return $mergedActor;
     }
 }
