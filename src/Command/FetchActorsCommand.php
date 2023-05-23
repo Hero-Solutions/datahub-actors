@@ -277,8 +277,12 @@ class FetchActorsCommand extends Command
                                     $actor['death_date'] = $actor1['death_date'];
                                 }
                                 $actor['alternative_names'] = array_merge($actor1['alternative_names'], $actor['alternative_names']);
-                                $actor['external_authorities'] = array_merge($actor1['external_authorities'], $actor['external_authorities']);
-                                $actor['works'] = array_merge($actor1['works'], $actor['works']);
+                                if(array_key_exists('external_authorities', $actor) && array_key_exists('external_authorities', $actor1)) {
+                                    $actor['external_authorities'] = array_merge($actor1['external_authorities'], $actor['external_authorities']);
+                                }
+                                if(array_key_exists('works', $actor) && array_key_exists('works', $actor1)) {
+                                    $actor['works'] = array_merge($actor1['works'], $actor['works']);
+                                }
                             }
                         }
                     }
@@ -309,8 +313,12 @@ class FetchActorsCommand extends Command
                             $actorValue['death_date'] = $actor['death_date'];
                         }
                         $actorValue['alternative_names'] = array_merge($actor['alternative_names'], $actors[$nameStripped]['alternative_names']);
-                        $actorValue['external_authorities'] = array_merge($actor['external_authorities'], $actors[$nameStripped]['external_authorities']);
-                        $actorValue['works'] = array_merge($actor['works'], $actors[$nameStripped]['works']);
+                        if(array_key_exists('external_authorities', $actor) && array_key_exists('external_authorities', $actors[$nameStripped])) {
+                            $actorValue['external_authorities'] = array_merge($actor['external_authorities'], $actors[$nameStripped]['external_authorities']);
+                        }
+                        if(array_key_exists('works', $actor) && array_key_exists('works', $actors[$nameStripped])) {
+                            $actorValue['works'] = array_merge($actor['works'], $actors[$nameStripped]['works']);
+                        }
                     }
                 }
                 $mergedActors2[$name] = $actorValue;
@@ -344,8 +352,12 @@ class FetchActorsCommand extends Command
                                     $actor['death_date'] = $actor1['death_date'];
                                 }
                                 $actor['alternative_names'] = array_merge($actor1['alternative_names'], $actor['alternative_names']);
-                                $actor['external_authorities'] = array_merge($actor1['external_authorities'], $actor['external_authorities']);
-                                $actor['works'] = array_merge($actor1['works'], $actor['works']);
+                                if(array_key_exists('external_authorities', $actor) && array_key_exists('external_authorities', $actor1)) {
+                                    $actor['external_authorities'] = array_merge($actor1['external_authorities'], $actor['external_authorities']);
+                                }
+                                if(array_key_exists('works', $actor) && array_key_exists('works', $actor1)) {
+                                    $actor['works'] = array_merge($actor1['works'], $actor['works']);
+                                }
                             }
                         }
                     }
