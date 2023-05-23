@@ -268,15 +268,8 @@ class FetchActorsCommand extends Command
                                     $rkdId1 = $actor1['external_authorities']['RKD'];
                                 }
                             }
-                            //Merge actors with the same RKD ID but different name
                             if ($rkdId1 !== null && $rkdId1 === $rkdId) {
                                 $actor = array_merge($actor1, $actor);
-                                if(!in_array($name, $actor['alternative_names'])) {
-                                    $actor['alternative_names'][] = $name;
-                                }
-                                if(!in_array($name1, $actor['alternative_names'])) {
-                                    $actor['alternative_names'][] = $name1;
-                                }
                             }
                         }
                     }
@@ -299,30 +292,51 @@ class FetchActorsCommand extends Command
                     if(array_key_exists($nameStripped, $actors) && !array_key_exists($nameStripped, $alreadyEncountered)) {
                         $alreadyEncountered[$nameStripped] = $nameStripped;
                         $actor = array_merge($actor, $actors[$nameStripped]);
-                        if(!in_array($name, $actor['alternative_names'])) {
-                            $actor['alternative_names'][] = $name;
-                        }
-                        if(!in_array($nameStripped, $actor['alternative_names'])) {
-                            $actor['alternative_names'][] = $nameStripped;
-                        }
-                        $nameKey = $nameStripped;
                     }
                 }
                 $mergedActors2[$name] = $actor;
             }
 
             $mergedActors3 = [];
-            foreach($mergedActors as $name => $actor) {
-                $actor['alternative_names'] = array_unique($actor['alternative_names']);
-                if(in_array($name, $actor['alternative_names'])) {
-                    $actor['alternative_names'] = array_values(array_diff($actor['alternative_names'], [$name]));
+            $alreadyEncountered = [];
+            foreach($mergedActors2 as $name => $actor) {
+                if(array_key_exists($name, $alreadyEncountered)) {
+                    continue;
+                }
+                foreach($actor['alternative_names'] as $altName) {
+                    if(array_key_exists($altName, $alreadyEncountered)) {
+                        continue;
+                    }
+                    foreach($mergedActors2 as $name1 => $actor1) {
+                        if(array_key_exists($name1, $alreadyEncountered)) {
+                            continue;
+                        }
+                        foreach($actor1['alternative_names'] as $altName1) {
+                            if (array_key_exists($altName1, $alreadyEncountered)) {
+                                continue;
+                            }
+                            if($altName === $altName1) {
+                                $alreadyEncountered[$nameStripped] = $nameStripped;
+                                $actor = array_merge($actor, $actor1);
+                            }
+                        }
+                    }
                 }
                 $mergedActors3[$name] = $actor;
             }
 
-            ksort($mergedActors3);
+            $mergedActors4 = [];
+            foreach($mergedActors3 as $name => $actor) {
+                $actor['alternative_names'] = array_unique($actor['alternative_names']);
+                if(in_array($name, $actor['alternative_names'])) {
+                    $actor['alternative_names'] = array_values(array_diff($actor['alternative_names'], [$name]));
+                }
+                $mergedActors4[$name] = $actor;
+            }
+
+            ksort($mergedActors4);
             $fp = fopen($filename, 'w');
-            fwrite($fp, json_encode($mergedActors3, JSON_PRETTY_PRINT));
+            fwrite($fp, json_encode($mergedActors4, JSON_PRETTY_PRINT));
             fclose($fp);
         }
 
