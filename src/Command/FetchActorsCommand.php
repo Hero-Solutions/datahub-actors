@@ -96,7 +96,11 @@ class FetchActorsCommand extends Command
                                 }
                                 if ($name !== null) {
                                     if (!array_key_exists($name, $actors)) {
-                                        $actors[$name] = [];
+                                        $actors[$name] = [
+                                            'alternative_names' => [
+                                                $name
+                                            ]
+                                        ];
                                     }
 
                                     $actorAltNames = $actor->xpath($alternativeNamesXpath);
@@ -104,9 +108,6 @@ class FetchActorsCommand extends Command
                                         foreach ($actorAltNames as $altName_) {
                                             $altName = (string)$altName_;
                                             if($altName !== $name) {
-                                                if(!array_key_exists('alternative_names', $actors[$name])) {
-                                                    $actors[$name]['alternative_names'] = [];
-                                                }
                                                 if(!in_array($altName, $actors[$name]['alternative_names'])) {
                                                     $actors[$name]['alternative_names'][] = $altName;
                                                 }
@@ -266,22 +267,16 @@ class FetchActorsCommand extends Command
                             //Merge actors with the same RKD ID but different name
                             if ($rkdId1 !== null && $rkdId1 === $rkdId) {
                                 $actorValue = array_merge($actor1, $actor);
-                                if(!array_key_exists('alternative_names', $actorValue)) {
-                                    $actorValue['alternative_names'] = [];
+                                if(!in_array($name, $actorValue['alternative_names'])) {
+                                    $actorValue['alternative_names'][] = $name;
                                 }
-                                //Add the name of one entry as alternative name to the other entry
+                                if(!in_array($name1, $actorValue['alternative_names'])) {
+                                    $actorValue['alternative_names'][] = $name1;
+                                }
                                 //Give preference to name1 if name contains ',', '(' or ')'
                                 if(strpos($name, ',') !== false || strpos($name, '(') !== false || strpos($name, ')') !== false) {
-                                    if(!in_array($name, $actorValue['alternative_names'])) {
-                                        $actorValue['alternative_names'][] = $name;
-                                    }
                                     $nameKey = $name1;
-                                } else {
-                                    if(!in_array($name1, $actorValue['alternative_names'])) {
-                                        $actorValue['alternative_names'][] = $name1;
-                                    }
                                 }
-                                $actorValue['alternative_names'] = array_unique($actorValue['alternative_names']);
                             }
                         }
                     }
@@ -304,22 +299,27 @@ class FetchActorsCommand extends Command
                     $nameStripped = str_replace(')', '', $nameStripped);
                     if(array_key_exists($nameStripped, $actors)) {
                         $actorValue = array_merge($actor, $actors[$nameStripped]);
-                        if(!array_key_exists('alternative_names', $actorValue)) {
-                            $actorValue['alternative_names'] = [];
-                        }
                         if(!in_array($name, $actorValue['alternative_names'])) {
                             $actors[$nameStripped]['alternative_names'][] = $name;
                         }
                         $nameKey = $nameStripped;
-                        $actorValue['alternative_names'] = array_unique($actorValue['alternative_names']);
                     }
                 }
                 $mergedActors2[$nameKey] = $actorValue;
             }
 
-            ksort($mergedActors2);
+            $mergedActors3 = [];
+            foreach($mergedActors as $name => $actor) {
+                $actor['alternative_names'] = array_unique($actor['alternative_names']);
+                if(in_array($name, $actor['alternative_names'])) {
+                    $actor['alternative_names'] = array_diff($actor['alternative_names'], [$name]);
+                }
+                $mergedActors3[$name] = $actor;
+            }
+
+            ksort($mergedActors3);
             $fp = fopen($filename, 'w');
-            fwrite($fp, json_encode($mergedActors2, JSON_PRETTY_PRINT));
+            fwrite($fp, json_encode($mergedActors3, JSON_PRETTY_PRINT));
             fclose($fp);
         }
 
