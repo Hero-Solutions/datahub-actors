@@ -242,13 +242,13 @@ class FetchActorsCommand extends Command
         if(!empty($actors)) {
             //Merge actors with the same RKD ID but with a different name
             $mergedActors = [];
+            $alreadyEncountered = [];
             foreach($actors as $name => $actor) {
-                if(array_key_exists($name, $mergedActors)) {
+                if(array_key_exists($name, $alreadyEncountered)) {
                     continue;
                 }
+                $alreadyEncountered[$name] = $name;
 
-                $nameKey = $name;
-                $actorValue = $actor;
                 $rkdId = null;
                 if(array_key_exists('external_authorities', $actor)) {
                     if(array_key_exists('RKD', $actor['external_authorities'])) {
@@ -257,7 +257,11 @@ class FetchActorsCommand extends Command
                 }
                 if($rkdId !== null) {
                     foreach($actors as $name1 => $actor1) {
+                        if(array_key_exists($name, $alreadyEncountered)) {
+                            continue;
+                        }
                         if($name1 !== $name) {
+                            $alreadyEncountered[$name1] = $name1;
                             $rkdId1 = null;
                             if (array_key_exists('external_authorities', $actor1)) {
                                 if (array_key_exists('RKD', $actor1['external_authorities'])) {
@@ -266,53 +270,52 @@ class FetchActorsCommand extends Command
                             }
                             //Merge actors with the same RKD ID but different name
                             if ($rkdId1 !== null && $rkdId1 === $rkdId) {
-                                $actorValue = array_merge($actor1, $actor);
-                                if(!in_array($name, $actorValue['alternative_names'])) {
-                                    $actorValue['alternative_names'][] = $name;
+                                $actor = array_merge($actor1, $actor);
+                                if(!in_array($name, $actor['alternative_names'])) {
+                                    $actor['alternative_names'][] = $name;
                                 }
-                                if(!in_array($name1, $actorValue['alternative_names'])) {
-                                    $actorValue['alternative_names'][] = $name1;
-                                }
-                                //Give preference to name1 if name contains ',', '(' or ')'
-                                if(strpos($name, ',') !== false || strpos($name, '(') !== false || strpos($name, ')') !== false) {
-                                    $nameKey = $name1;
+                                if(!in_array($name1, $actor['alternative_names'])) {
+                                    $actor['alternative_names'][] = $name1;
                                 }
                             }
                         }
                     }
                 }
-                $mergedActors[$nameKey] = $actorValue;
+                $mergedActors[$name] = $actor;
             }
 
             //Merge actors with the same name but with '(' or ')' in one name and not in the other
             $mergedActors2 = [];
+            $alreadyEncountered = [];
             foreach($mergedActors as $name => $actor) {
-                if(array_key_exists($name, $mergedActors2)) {
+                if(array_key_exists($name, $alreadyEncountered)) {
                     continue;
                 }
 
-                $nameKey = $name;
-                $actorValue = $actor;
                 //Check if this name already exists but with '(' or ')' in the name
                 if(strpos($name, '(') !== false || strpos($name, ')') !== false) {
                     $nameStripped = str_replace('(', '', $name);
                     $nameStripped = str_replace(')', '', $nameStripped);
-                    if(array_key_exists($nameStripped, $actors)) {
-                        $actorValue = array_merge($actor, $actors[$nameStripped]);
-                        if(!in_array($name, $actorValue['alternative_names'])) {
-                            $actors[$nameStripped]['alternative_names'][] = $name;
+                    if(array_key_exists($nameStripped, $actors) && !array_key_exists($nameStripped, $alreadyEncountered)) {
+                        $alreadyEncountered[$nameStripped] = $nameStripped;
+                        $actor = array_merge($actor, $actors[$nameStripped]);
+                        if(!in_array($name, $actor['alternative_names'])) {
+                            $actor['alternative_names'][] = $name;
+                        }
+                        if(!in_array($nameStripped, $actor['alternative_names'])) {
+                            $actor['alternative_names'][] = $nameStripped;
                         }
                         $nameKey = $nameStripped;
                     }
                 }
-                $mergedActors2[$nameKey] = $actorValue;
+                $mergedActors2[$name] = $actor;
             }
 
             $mergedActors3 = [];
             foreach($mergedActors as $name => $actor) {
                 $actor['alternative_names'] = array_unique($actor['alternative_names']);
                 if(in_array($name, $actor['alternative_names'])) {
-                    $actor['alternative_names'] = array_diff($actor['alternative_names'], [$name]);
+                    $actor['alternative_names'] = array_values(array_diff($actor['alternative_names'], [$name]));
                 }
                 $mergedActors3[$name] = $actor;
             }
