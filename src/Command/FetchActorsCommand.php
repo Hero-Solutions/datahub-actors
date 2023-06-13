@@ -297,6 +297,7 @@ class FetchActorsCommand extends Command
                 $mergedActors2[$name] = $actorValue;
             }
 
+            //Merge actors where one of the alternative names matches with each other
             $mergedActors3 = [];
             $alreadyEncountered = [];
             foreach($mergedActors2 as $name => $actor) {
@@ -325,21 +326,60 @@ class FetchActorsCommand extends Command
                 $mergedActors3[$name] = $actor;
             }
 
+            //Once again merge actors with the same RKD ID but with a different name
             $mergedActors4 = [];
-            foreach($mergedActors3 as $name => $actor) {
+            $alreadyEncountered = [];
+            foreach($actors as $name => $actor) {
+                if(array_key_exists($name, $alreadyEncountered)) {
+                    continue;
+                }
+                $alreadyEncountered[$name] = $name;
+
+                $rkdId = null;
+                if(array_key_exists('external_authorities', $actor)) {
+                    if(array_key_exists('RKD', $actor['external_authorities'])) {
+                        $rkdId = $actor['external_authorities']['RKD'];
+                    }
+                }
+                if($rkdId !== null) {
+                    foreach($actors as $name1 => $actor1) {
+                        if(array_key_exists($name, $alreadyEncountered)) {
+                            continue;
+                        }
+                        if($name1 !== $name) {
+                            $alreadyEncountered[$name1] = $name1;
+                            $rkdId1 = null;
+                            if (array_key_exists('external_authorities', $actor1)) {
+                                if (array_key_exists('RKD', $actor1['external_authorities'])) {
+                                    $rkdId1 = $actor1['external_authorities']['RKD'];
+                                }
+                            }
+                            if ($rkdId1 !== null && $rkdId1 === $rkdId) {
+                                $actor = $this->mergeActors($actor, $actor1);
+                            }
+                        }
+                    }
+                }
+                $mergedActors4[$name] = $actor;
+            }
+
+            //Remove all duplicates in the alternative_names list
+            $mergedActors5 = [];
+            foreach($mergedActors4 as $name => $actor) {
                 $actor['alternative_names'] = array_unique($actor['alternative_names']);
+                //Filter out the primary name
                 if(in_array($name, $actor['alternative_names'])) {
                     $actor['alternative_names'] = array_values(array_diff($actor['alternative_names'], [$name]));
                 }
                 if(empty($actor['alternative_names'])) {
                     unset($actor['alternative_names']);
                 }
-                $mergedActors4[$name] = $actor;
+                $mergedActors5[$name] = $actor;
             }
 
-            ksort($mergedActors4);
+            ksort($mergedActors5);
             $fp = fopen($filename, 'w');
-            fwrite($fp, json_encode($mergedActors4, JSON_PRETTY_PRINT));
+            fwrite($fp, json_encode($mergedActors5, JSON_PRETTY_PRINT));
             fclose($fp);
         }
 
