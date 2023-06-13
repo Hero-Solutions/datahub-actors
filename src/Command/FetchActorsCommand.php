@@ -95,8 +95,10 @@ class FetchActorsCommand extends Command
                                     }
                                 }
                                 if ($name !== null) {
-                                    if (!array_key_exists($name, $actors)) {
-                                        $actors[$name] = [
+                                    $nameLower = strtolower($name);
+                                    if (!array_key_exists($nameLower, $actors)) {
+                                        $actors[$nameLower] = [
+                                            'primary_name' => $name,
                                             'alternative_names' => [
                                                 $name
                                             ]
@@ -107,9 +109,10 @@ class FetchActorsCommand extends Command
                                     if ($actorAltNames) {
                                         foreach ($actorAltNames as $altName_) {
                                             $altName = (string)$altName_;
-                                            if($altName !== $name) {
-                                                if(!in_array($altName, $actors[$name]['alternative_names'])) {
-                                                    $actors[$name]['alternative_names'][] = $altName;
+                                            $lowerAltName = strtolower($altName);
+                                            if($lowerAltName !== $nameLower) {
+                                                if(!in_array($lowerAltName, $actors[$nameLower]['alternative_names'])) {
+                                                    $actors[$nameLower]['alternative_names'][] = $altName;
                                                 }
                                             }
                                         }
@@ -132,20 +135,20 @@ class FetchActorsCommand extends Command
                                     }
 
                                     if($birthDate !== null && !empty($birthDate)) {
-                                        if(!array_key_exists('birth_date', $actors[$name])) {
-                                            $actors[$name]['birth_date'] = $birthDate;
+                                        if(!array_key_exists('birth_date', $actors[$nameLower])) {
+                                            $actors[$nameLower]['birth_date'] = $birthDate;
                                         } else {
-                                            if(strlen($birthDate) > strlen($actors[$name]['birth_date'])) {
-                                                $actors[$name]['birth_date'] = $birthDate;
+                                            if(strlen($birthDate) > strlen($actors[$nameLower]['birth_date'])) {
+                                                $actors[$nameLower]['birth_date'] = $birthDate;
                                             }
                                         }
                                     }
                                     if($deathDate !== null && !empty($deathDate)) {
-                                        if(!array_key_exists('death_date', $actors[$name])) {
-                                            $actors[$name]['death_date'] = $deathDate;
+                                        if(!array_key_exists('death_date', $actors[$nameLower])) {
+                                            $actors[$nameLower]['death_date'] = $deathDate;
                                         } else {
-                                            if(strlen($deathDate) > strlen($actors[$name]['death_date'])) {
-                                                $actors[$name]['death_date'] = $deathDate;
+                                            if(strlen($deathDate) > strlen($actors[$nameLower]['death_date'])) {
+                                                $actors[$nameLower]['death_date'] = $deathDate;
                                             }
                                         }
                                     }
@@ -163,18 +166,18 @@ class FetchActorsCommand extends Command
                                             if($externalAuthoritySource !== null) {
                                                 $id = (string)$id_;
                                                 str_replace('http://', 'https://', $id);
-                                                if (!array_key_exists('external_authorities', $actors[$name])) {
-                                                    $actors[$name]['external_authorities'] = [];
+                                                if (!array_key_exists('external_authorities', $actors[$nameLower])) {
+                                                    $actors[$nameLower]['external_authorities'] = [];
                                                 }
-                                                if (!in_array($id, $actors[$name]['external_authorities'])) {
-                                                    $actors[$name]['external_authorities'][$externalAuthoritySource] = $id;
+                                                if (!in_array($id, $actors[$nameLower]['external_authorities'])) {
+                                                    $actors[$nameLower]['external_authorities'][$externalAuthoritySource] = $id;
                                                 }
                                             }
                                         }
                                     }
 
-                                    if(!array_key_exists('works', $actors[$name])) {
-                                        $actors[$name]['works'] = [];
+                                    if(!array_key_exists('works', $actors[$nameLower])) {
+                                        $actors[$nameLower]['works'] = [];
                                     }
                                     $work = [];
 
@@ -228,7 +231,7 @@ class FetchActorsCommand extends Command
                                         $work['attribution_en'] = $attributionEn;
                                     }
 
-                                    $actors[$name]['works'][$objectId] = $work;
+                                    $actors[$nameLower]['works'][$objectId] = $work;
                                 }
                             }
                         }
@@ -372,18 +375,25 @@ class FetchActorsCommand extends Command
             }
 
             //Add 's' at the end of 'Anonieme Meester'
-            if(array_key_exists('Anonieme Meester', $mergedActors5)) {
-                if(array_key_exists('Anonieme Meesters', $mergedActors5)) {
-                    $mergedActors5['Anonieme Meesters'] = $this->mergeActors($mergedActors5['Anonieme Meesters'], $mergedActors5['Anonieme Meester']);
+            if(array_key_exists('anonieme meester', $mergedActors5)) {
+                if(array_key_exists('anonieme meesters', $mergedActors5)) {
+                    $mergedActors5['anonieme meesters'] = $this->mergeActors($mergedActors5['anonieme meesters'], $mergedActors5['anonieme meester']);
                 } else {
-                    $mergedActors5['Anonieme Meesters'] = $mergedActors5['Anonieme Meester'];
+                    $mergedActors5['anonieme meesters'] = $mergedActors5['anonieme meester'];
                 }
-                unset($mergedActors5['Anonieme Meester']);
+                unset($mergedActors5['anonieme meester']);
             }
 
-            ksort($mergedActors5);
+            //Use primary_name as key
+            $mergedActors6 = [];
+            foreach($actors as $name => $actor) {
+                $mergedActors6[$actor['primary_name']] = $actor;
+                unset($mergedActors6[$actor['primary_name']]['primary_name']);
+            }
+
+            ksort($mergedActors6);
             $fp = fopen($filename, 'w');
-            fwrite($fp, json_encode($mergedActors5, JSON_PRETTY_PRINT));
+            fwrite($fp, json_encode($mergedActors6, JSON_PRETTY_PRINT));
             fclose($fp);
         }
 
