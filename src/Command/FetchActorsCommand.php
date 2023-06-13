@@ -386,7 +386,7 @@ class FetchActorsCommand extends Command
 
             //Use primary_name as key
             $mergedActors6 = [];
-            foreach($actors as $name => $actor) {
+            foreach($mergedActors5 as $name => $actor) {
                 $mergedActors6[$actor['primary_name']] = $actor;
                 unset($mergedActors6[$actor['primary_name']]['primary_name']);
             }
