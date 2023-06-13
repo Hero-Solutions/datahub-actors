@@ -357,10 +357,28 @@ class FetchActorsCommand extends Command
                 if(in_array($name, $actor['alternative_names'])) {
                     $actor['alternative_names'] = array_values(array_diff($actor['alternative_names'], [$name]));
                 }
+                $newAltNames = [];
+                foreach($actor['alternative_names'] as $altName) {
+                    if(strtolower($name) !== strtolower($altName)) {
+                        $newAltNames[] = $altName;
+                    }
+                }
                 if(empty($actor['alternative_names'])) {
                     unset($actor['alternative_names']);
+                } else {
+                    $actor['alternative_names'] = $newAltNames;
                 }
                 $mergedActors5[$name] = $actor;
+            }
+
+            //Add 's' at the end of 'Anonieme Meester'
+            if(array_key_exists('Anonieme Meester', $mergedActors5)) {
+                if(array_key_exists('Anonieme Meesters', $mergedActors5)) {
+                    $mergedActors5['Anonieme Meesters'] = $this->mergeActors($mergedActors5['Anonieme Meesters'], $mergedActors5['Anonieme Meester']);
+                } else {
+                    $mergedActors5['Anonieme Meesters'] = $mergedActors5['Anonieme Meester'];
+                }
+                unset($mergedActors5['Anonieme Meester']);
             }
 
             ksort($mergedActors5);
