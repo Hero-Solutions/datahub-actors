@@ -54,6 +54,7 @@ class FetchActorsCommand extends Command
             $objectIdXpath = $this->buildXPath($xpaths['object_id'], $this->namespace);
             $actorXPath = $this->buildXPath($xpaths['actor'], $this->namespace);
             $nameXpath = $this->buildXPath($xpaths['name'], $this->namespace);
+            $nameWithCommaXpath = $this->buildXPath($xpaths['name_with_comma'], $this->namespace);
             $alternativeNamesXpath = $this->buildXPath($xpaths['alternative_names'], $this->namespace);
             $externalAuthoritiesXpath = $this->buildXPath($xpaths['external_authorities'], $this->namespace);
             $roleNlXpath = $this->buildXPath($xpaths['role_nl'], $this->namespace);
@@ -95,14 +96,35 @@ class FetchActorsCommand extends Command
                                     }
                                 }
                                 if ($name !== null) {
+
+                                    $nameWithComma = null;
+                                    $actorNamesWithComma = $actor->xpath($nameWithCommaXpath);
+                                    if ($actorNamesWithComma) {
+                                        foreach ($actorNamesWithComma as $actorNameWithComma) {
+                                            $nameWithComma = (string)$actorNameWithComma;
+                                            break;
+                                        }
+                                    }
+
                                     $nameLower = strtolower($name);
                                     if (!array_key_exists($nameLower, $actors)) {
-                                        $actors[$nameLower] = [
-                                            'primary_name' => $name,
-                                            'alternative_names' => [
-                                                $name
-                                            ]
-                                        ];
+                                        if($nameWithComma !== null) {
+                                            $actors[$nameLower] = [
+                                                'primary_name' => $name,
+                                                'name_with_comma' => $nameWithComma,
+                                                'alternative_names' => [
+                                                    $name
+                                                ]
+                                            ];
+                                        } else {
+                                            echo 'Error: no name with comma found for actor ' . $name . ' (object ' . $objectId . ')' . PHP_EOL;
+                                            $actors[$nameLower] = [
+                                                'primary_name' => $name,
+                                                'alternative_names' => [
+                                                    $name
+                                                ]
+                                            ];
+                                        }
                                     }
 
                                     $actorAltNames = $actor->xpath($alternativeNamesXpath);
