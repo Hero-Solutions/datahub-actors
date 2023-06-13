@@ -363,7 +363,7 @@ class FetchActorsCommand extends Command
                         $newAltNames[] = $altName;
                     }
                 }
-                if(empty($actor['alternative_names'])) {
+                if(empty($newAltNames)) {
                     unset($actor['alternative_names']);
                 } else {
                     $actor['alternative_names'] = $newAltNames;
