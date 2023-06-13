@@ -240,7 +240,7 @@ class FetchActorsCommand extends Command
         }
 
         if(!empty($actors)) {
-            //Merge actors with the same RKD ID but with a different name
+            //Merge actors with the same external ID but with a different name
             $mergedActors = [];
             $alreadyEncountered = [];
             foreach($actors as $name => $actor) {
@@ -248,33 +248,26 @@ class FetchActorsCommand extends Command
                     continue;
                 }
                 $alreadyEncountered[$name] = $name;
+                $actorValue = $actor;
 
-                $rkdId = null;
                 if(array_key_exists('external_authorities', $actor)) {
-                    if(array_key_exists('RKD', $actor['external_authorities'])) {
-                        $rkdId = $actor['external_authorities']['RKD'];
-                    }
-                }
-                if($rkdId !== null) {
-                    foreach($actors as $name1 => $actor1) {
-                        if(array_key_exists($name, $alreadyEncountered)) {
-                            continue;
-                        }
-                        if($name1 !== $name) {
-                            $alreadyEncountered[$name1] = $name1;
-                            $rkdId1 = null;
-                            if (array_key_exists('external_authorities', $actor1)) {
-                                if (array_key_exists('RKD', $actor1['external_authorities'])) {
-                                    $rkdId1 = $actor1['external_authorities']['RKD'];
+                    foreach($actor['external_authorities'] as $authority => $id) {
+                        foreach($actors as $name1 => $actor1) {
+                            if($name1 !== $name && !array_key_exists($name1, $alreadyEncountered)) {
+                                if (array_key_exists('external_authorities', $actor1)) {
+                                    foreach($actor1['external_authorities'] as $authority1 => $id1) {
+                                        if($id === $id1) {
+                                            $alreadyEncountered[$name1] = $name1;
+                                            $actorValue = $this->mergeActors($actor, $actor1);
+                                            break;
+                                        }
+                                    }
                                 }
                             }
-                            if ($rkdId1 !== null && $rkdId1 === $rkdId) {
-                                $actor = $this->mergeActors($actor, $actor1);
-                            }
                         }
                     }
                 }
-                $mergedActors[$name] = $actor;
+                $mergedActors[$name] = $actorValue;
             }
 
             //Merge actors with the same name but with '(' or ')' in one name and not in the other
@@ -326,7 +319,7 @@ class FetchActorsCommand extends Command
                 $mergedActors3[$name] = $actor;
             }
 
-            //Once again merge actors with the same RKD ID but with a different name
+            //Once again merge actors with the same external ID but with a different name
             $mergedActors4 = [];
             $alreadyEncountered = [];
             foreach($actors as $name => $actor) {
@@ -334,33 +327,26 @@ class FetchActorsCommand extends Command
                     continue;
                 }
                 $alreadyEncountered[$name] = $name;
+                $actorValue = $actor;
 
-                $rkdId = null;
                 if(array_key_exists('external_authorities', $actor)) {
-                    if(array_key_exists('RKD', $actor['external_authorities'])) {
-                        $rkdId = $actor['external_authorities']['RKD'];
-                    }
-                }
-                if($rkdId !== null) {
-                    foreach($actors as $name1 => $actor1) {
-                        if(array_key_exists($name, $alreadyEncountered)) {
-                            continue;
-                        }
-                        if($name1 !== $name) {
-                            $alreadyEncountered[$name1] = $name1;
-                            $rkdId1 = null;
-                            if (array_key_exists('external_authorities', $actor1)) {
-                                if (array_key_exists('RKD', $actor1['external_authorities'])) {
-                                    $rkdId1 = $actor1['external_authorities']['RKD'];
+                    foreach($actor['external_authorities'] as $authority => $id) {
+                        foreach($actors as $name1 => $actor1) {
+                            if($name1 !== $name && !array_key_exists($name1, $alreadyEncountered)) {
+                                if (array_key_exists('external_authorities', $actor1)) {
+                                    foreach($actor1['external_authorities'] as $authority1 => $id1) {
+                                        if($id === $id1) {
+                                            $alreadyEncountered[$name1] = $name1;
+                                            $actorValue = $this->mergeActors($actor, $actor1);
+                                            break;
+                                        }
+                                    }
                                 }
                             }
-                            if ($rkdId1 !== null && $rkdId1 === $rkdId) {
-                                $actor = $this->mergeActors($actor, $actor1);
-                            }
                         }
                     }
                 }
-                $mergedActors4[$name] = $actor;
+                $mergedActors4[$name] = $actorValue;
             }
 
             //Remove all duplicates in the alternative_names list
