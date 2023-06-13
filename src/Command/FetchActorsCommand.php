@@ -113,7 +113,8 @@ class FetchActorsCommand extends Command
                                                 'primary_name' => $name,
                                                 'name_with_comma' => $nameWithComma,
                                                 'alternative_names' => [
-                                                    $name
+                                                    $name,
+                                                    $nameWithComma
                                                 ]
                                             ];
                                         } else {
