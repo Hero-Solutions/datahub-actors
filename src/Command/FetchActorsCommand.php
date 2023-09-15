@@ -386,12 +386,6 @@ class FetchActorsCommand extends Command
             foreach($mergedActors4 as $name => $actor) {
                 $actor['alternative_names'] = array_unique($actor['alternative_names']);
                 //Filter out the primary name
-                if(in_array($name, $actor['alternative_names'])) {
-                    $actor['alternative_names'] = array_values(array_diff($actor['alternative_names'], [$name]));
-                }
-                if(in_array(strtolower($name), $actor['alternative_names'])) {
-                    $actor['alternative_names'] = array_values(array_diff($actor['alternative_names'], [strtolower($name)]));
-                }
                 if(in_array($actor['primary_name'], $actor['alternative_names'])) {
                     $actor['alternative_names'] = array_values(array_diff($actor['alternative_names'], [$actor['primary_name']]));
                 }
