@@ -114,6 +114,7 @@ class FetchActorsCommand extends Command
                                                 'name_with_comma' => $nameWithComma,
                                                 'alternative_names' => [
                                                     $name,
+                                                    $nameLower,
                                                     $nameWithComma
                                                 ]
                                             ];
@@ -122,7 +123,8 @@ class FetchActorsCommand extends Command
                                             $actors[$nameLower] = [
                                                 'primary_name' => $name,
                                                 'alternative_names' => [
-                                                    $name
+                                                    $name,
+                                                    $nameLower
                                                 ]
                                             ];
                                         }
