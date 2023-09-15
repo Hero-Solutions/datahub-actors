@@ -387,12 +387,24 @@ class FetchActorsCommand extends Command
                 $actor['alternative_names'] = array_unique($actor['alternative_names']);
                 //Filter out the primary name
                 if(in_array($name, $actor['alternative_names'])) {
-                    $actor['alternative_names'] = array_values(array_diff($actor['alternative_names'], [$name, strtolower($name), $actor['primary_name'], strtolower($actor['primary_name'])]));
+                    $actor['alternative_names'] = array_values(array_diff($actor['alternative_names'], [$name]));
+                }
+                if(in_array(strtolower($name), $actor['alternative_names'])) {
+                    $actor['alternative_names'] = array_values(array_diff($actor['alternative_names'], [strtolower($name)]));
+                }
+                if(in_array($actor['primary_name'], $actor['alternative_names'])) {
+                    $actor['alternative_names'] = array_values(array_diff($actor['alternative_names'], [$actor['primary_name']]));
+                }
+                if(in_array(strtolower($actor['primary_name']), $actor['alternative_names'])) {
+                    $actor['alternative_names'] = array_values(array_diff($actor['alternative_names'], [strtolower($actor['primary_name'])]));
                 }
                 //Filter out the name with comma
                 if(array_key_exists('name_with_comma', $actor)) {
                     if (in_array($actor['name_with_comma'], $actor['alternative_names'])) {
-                        $actor['alternative_names'] = array_values(array_diff($actor['alternative_names'], [$actor['name_with_comma'], strtolower($actor['name_with_comma'])]));
+                        $actor['alternative_names'] = array_values(array_diff($actor['alternative_names'], [$actor['name_with_comma']]));
+                    }
+                    if (in_array(strtolower($actor['name_with_comma']), $actor['alternative_names'])) {
+                        $actor['alternative_names'] = array_values(array_diff($actor['alternative_names'], [strtolower($actor['name_with_comma'])]));
                     }
                 }
                 $newAltNames = [];
