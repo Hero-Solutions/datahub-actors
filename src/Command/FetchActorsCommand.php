@@ -136,7 +136,7 @@ class FetchActorsCommand extends Command
                                             $altName = (string)$altName_;
                                             $lowerAltName = strtolower($altName);
                                             if($lowerAltName !== $nameLower) {
-                                                if(!in_array($lowerAltName, $actors[$nameLower]['alternative_names'])) {
+                                                if(!in_array($altName, $actors[$nameLower]['alternative_names'])) {
                                                     $actors[$nameLower]['alternative_names'][] = $altName;
                                                 }
                                             }
