@@ -303,6 +303,7 @@ class FetchActorsCommand extends Command
                 if(array_key_exists($name, $alreadyEncountered)) {
                     continue;
                 }
+                $alreadyEncountered[$name] = $name;
                 $actorValue = $actor;
 
                 //Check if this name already exists but with '(' or ')' in the name
@@ -311,8 +312,8 @@ class FetchActorsCommand extends Command
                     $nameStripped = str_replace(')', '', $nameStripped);
                     $nameStripped = str_replace('-', ' ', $nameStripped);
                     if(array_key_exists($nameStripped, $actors) && !array_key_exists($nameStripped, $alreadyEncountered)) {
-                        $actorValue = $this->mergeActors($actors[$nameStripped], $actor);
                         $alreadyEncountered[$nameStripped] = $nameStripped;
+                        $actorValue = $this->mergeActors($actors[$nameStripped], $actor);
                     }
                 }
                 $mergedActors2[$name] = $actorValue;
@@ -325,27 +326,23 @@ class FetchActorsCommand extends Command
                 if(array_key_exists($name, $alreadyEncountered)) {
                     continue;
                 }
+                $alreadyEncountered[$name] = $name;
                 foreach($actor['alternative_names'] as $altName) {
-                    if(array_key_exists($altName, $alreadyEncountered)) {
-                        continue;
-                    }
                     $altNameStripped = str_replace('(', '', $altName);
                     $altNameStripped = str_replace(')', '', $altNameStripped);
                     $altNameStripped = str_replace('-', ' ', $altNameStripped);
                     foreach($mergedActors2 as $name1 => $actor1) {
-                        if(array_key_exists($name1, $alreadyEncountered)) {
+                        if (array_key_exists($name1, $alreadyEncountered)) {
                             continue;
                         }
                         foreach($actor1['alternative_names'] as $altName1) {
-                            if (array_key_exists($altName1, $alreadyEncountered)) {
-                                continue;
-                            }
                             $altNameStripped1 = str_replace('(', '', $altName1);
                             $altNameStripped1 = str_replace(')', '', $altNameStripped1);
                             $altNameStripped1 = str_replace('-', ' ', $altNameStripped1);
                             if($altNameStripped === $altNameStripped1) {
-                                $alreadyEncountered[$altName1] = $altName1;
+                                $alreadyEncountered[$name1] = $name1;
                                 $actor = $this->mergeActors($actor, $actor1);
+                                break;
                             }
                         }
                     }
