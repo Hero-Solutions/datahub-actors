@@ -401,22 +401,22 @@ class FetchActorsCommand extends Command
                         $newAltNames[] = $altName;
                     }
                 }
-                if(empty($newAltNames)) {
-                    unset($actor['alternative_names']);
-                } else {
-                    $newAltNames2 = [];
-                    foreach($newAltNames as $altName) {
-                        $add = true;
-                        foreach($newAltNames as $altName1) {
-                            if($altName !== $altName1 && strtolower($altName1) === $altName) {
-                                $add = false;
-                                break;
-                            }
-                        }
-                        if($add) {
-                            $newAltNames2[] = $altName;
+                $newAltNames2 = [];
+                foreach($newAltNames as $altName) {
+                    $add = true;
+                    foreach($newAltNames as $altName1) {
+                        if($altName !== $altName1 && strtolower($altName1) === $altName) {
+                            $add = false;
+                            break;
                         }
                     }
+                    if($add) {
+                        $newAltNames2[] = $altName;
+                    }
+                }
+                if(empty($newAltNames2)) {
+                    unset($actor['alternative_names']);
+                } else {
                     $actor['alternative_names'] = $newAltNames2;
                 }
                 $mergedActors5[$name] = $actor;
