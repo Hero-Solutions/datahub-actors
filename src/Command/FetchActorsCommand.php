@@ -387,12 +387,12 @@ class FetchActorsCommand extends Command
                 $actor['alternative_names'] = array_unique($actor['alternative_names']);
                 //Filter out the primary name
                 if(in_array($name, $actor['alternative_names'])) {
-                    $actor['alternative_names'] = array_values(array_diff($actor['alternative_names'], [$name]));
+                    $actor['alternative_names'] = array_values(array_diff($actor['alternative_names'], [$name, strtolower($name), $actor['primary_name'], strtolower($actor['primary_name'])]));
                 }
                 //Filter out the name with comma
                 if(array_key_exists('name_with_comma', $actor)) {
                     if (in_array($actor['name_with_comma'], $actor['alternative_names'])) {
-                        $actor['alternative_names'] = array_values(array_diff($actor['alternative_names'], [$actor['name_with_comma']]));
+                        $actor['alternative_names'] = array_values(array_diff($actor['alternative_names'], [$actor['name_with_comma'], strtolower($actor['name_with_comma'])]));
                     }
                 }
                 $newAltNames = [];
