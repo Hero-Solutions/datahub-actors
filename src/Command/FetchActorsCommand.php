@@ -331,6 +331,7 @@ class FetchActorsCommand extends Command
                     $altNameStripped = str_replace('(', '', $altName);
                     $altNameStripped = str_replace(')', '', $altNameStripped);
                     $altNameStripped = str_replace('-', ' ', $altNameStripped);
+                    $altNameStripped = strtolower($altNameStripped);
                     foreach($mergedActors2 as $name1 => $actor1) {
                         if (array_key_exists($name1, $alreadyEncountered)) {
                             continue;
@@ -339,6 +340,7 @@ class FetchActorsCommand extends Command
                             $altNameStripped1 = str_replace('(', '', $altName1);
                             $altNameStripped1 = str_replace(')', '', $altNameStripped1);
                             $altNameStripped1 = str_replace('-', ' ', $altNameStripped1);
+                            $altNameStripped1 = strtolower($altNameStripped1);
                             if($altNameStripped === $altNameStripped1) {
                                 $alreadyEncountered[$name1] = $name1;
                                 $actor = $this->mergeActors($actor, $actor1);
