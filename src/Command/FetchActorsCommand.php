@@ -355,7 +355,7 @@ class FetchActorsCommand extends Command
             //Once again merge actors with the same external ID but with a different name
             $mergedActors4 = [];
             $alreadyEncountered = [];
-            foreach($actors as $name => $actor) {
+            foreach($mergedActors3 as $name => $actor) {
                 if(array_key_exists($name, $alreadyEncountered)) {
                     continue;
                 }
@@ -363,7 +363,7 @@ class FetchActorsCommand extends Command
 
                 if(array_key_exists('external_authorities', $actor)) {
                     foreach($actor['external_authorities'] as $authority => $id) {
-                        foreach($actors as $name1 => $actor1) {
+                        foreach($mergedActors3 as $name1 => $actor1) {
                             if($name1 !== $name && !array_key_exists($name1, $alreadyEncountered)) {
                                 if (array_key_exists('external_authorities', $actor1)) {
                                     foreach($actor1['external_authorities'] as $authority1 => $id1) {
