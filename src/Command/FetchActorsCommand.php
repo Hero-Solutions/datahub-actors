@@ -408,7 +408,7 @@ class FetchActorsCommand extends Command
                 }
                 foreach($actor['alternative_names'] as $altName) {
                     $lowerAltName = strtolower($altName);
-                    if(array_key_exists($lowerAltName, $actor['alternative_names'])) {
+                    if($lowerAltName !== $altName && array_key_exists($lowerAltName, $actor['alternative_names'])) {
                         unset($actor['alternative_names'][$lowerAltName]);
                     }
                 }
