@@ -305,11 +305,10 @@ class FetchActorsCommand extends Command
                 if(array_key_exists($name, $alreadyEncountered)) {
                     continue;
                 }
-                $alreadyEncountered[$name] = $name;
                 $actorValue = $actor;
 
                 //Check if this name already exists but with '(' or ')' in the name
-                if(strpos($name, '(') !== false || strpos($name, ')') !== false) {
+                if(strpos($name, '(') !== false || strpos($name, ')') !== false || strpos($name, '-') !== false) {
                     $nameStripped = str_replace('(', '', $name);
                     $nameStripped = str_replace(')', '', $nameStripped);
                     $nameStripped = str_replace('-', ' ', $nameStripped);
@@ -328,7 +327,6 @@ class FetchActorsCommand extends Command
                 if(array_key_exists($name, $alreadyEncountered)) {
                     continue;
                 }
-                $alreadyEncountered[$name] = $name;
                 foreach($actor['alternative_names'] as $altName) {
                     $altNameStripped = str_replace('(', '', $altName);
                     $altNameStripped = str_replace(')', '', $altNameStripped);
@@ -361,7 +359,6 @@ class FetchActorsCommand extends Command
                 if(array_key_exists($name, $alreadyEncountered)) {
                     continue;
                 }
-                $alreadyEncountered[$name] = $name;
                 $actorValue = $actor;
 
                 if(array_key_exists('external_authorities', $actor)) {
