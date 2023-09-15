@@ -406,6 +406,12 @@ class FetchActorsCommand extends Command
                 } else {
                     $actor['alternative_names'] = $newAltNames;
                 }
+                foreach($actor['alternative_names'] as $altName) {
+                    $lowerAltName = strtolower($altName);
+                    if(array_key_exists($lowerAltName, $actor['alternative_names'])) {
+                        unset($actor['alternative_names'][$lowerAltName]);
+                    }
+                }
                 $mergedActors5[$name] = $actor;
             }
 
