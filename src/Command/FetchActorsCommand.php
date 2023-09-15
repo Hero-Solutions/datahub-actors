@@ -403,7 +403,7 @@ class FetchActorsCommand extends Command
                 }
                 $newAltNames = [];
                 foreach($actor['alternative_names'] as $altName) {
-                    if(strtolower($name) !== strtolower($altName)) {
+                    if(strtolower($actor['primary_name']) !== strtolower($altName)) {
                         $newAltNames[] = $altName;
                     }
                 }
